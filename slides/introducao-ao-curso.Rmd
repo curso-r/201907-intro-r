@@ -10,6 +10,13 @@ output:
       highlightLines: true
       countIncrementalSlides: false
 ---
+
+class: middle, center
+
+# [bit.ly/201907-intro-r-material](bit.ly/201907-intro-r-material)
+
+---
+
 class: middle, center
 
 # Sobre a Curso-R
