@@ -1,13 +1,35 @@
+library(readr)
+library(tibble)
 
+tibble::view()
+
+imdb <- read_csv(file = "dados/imdb.csv")
+View(imdb)
+
+library(readr)
+imdb <- read_csv("dados/imdb.csv", locale = locale(encoding = "ISO-8859-1"))
+view(imdb)
+
+imdb <- read_csv("")
+
+read_csv()
+
+a <- 1
+a <- 2
+
+#rodar: ctrl + enter
+# <-: ALT + -
 
 # Funções -----------------------------------------------------------------
 
 #Sintaxe
-nome_da_funcao(arg1, arg2)
+nome_da_funcao(arg1, arg2, ...)
 
 # Objetos -----------------------------------------------------------------
 
-# Os nomes devem começar com uma letra. Podem conter letras, números, _ e .
+# Os nomes devem começar com uma letra. 
+# Podem conter letras, números, _ e .
+imdb_ <- read_csv("dados/imdb.csv")
 
 eu_uso_snake_case
 outrasPessoasUsamCamelCase
@@ -25,12 +47,15 @@ obj
 a <- 5
 A <- 42
 
-
+tibble::view(im)
 
 # Caminhos até o arquivo --------------------------------------------------
 
 # 1. Podem ser absolutos
-"/home/william/Documents/Curso-R/intro-programacao-em-r-mestre/dados/imdb.csv"
+"/Users/william/Documents/curso-r/201907-intro-r/dados/imdb.csv"
+
+#relativo
+"dados/imdb.csv"
 
 # 2. Podem ser relativos ao diretório de trabalho
 getwd()
@@ -39,15 +64,23 @@ getwd()
 
 # Importando de texto e excel ---------------------------------------------
 
+read.csv()
+read.csv2()
+
+read_csv()
+read_csv2()
+
 # Arquivos de texto
 imdb <- read_csv(file = "dados/imdb.csv")
 imdb2 <- read_delim("dados/imdb2.csv", delim = ";")
 
 # Excel
-library(readxl)
+install.packages("readxl")
+
 imdb_excel <- read_excel("dados/imdb.xlsx")
 
-
+install.packages("tidyverse")
+library(tidyverse)
 
 
 # Classes -----------------------------------------------------------------
@@ -67,15 +100,30 @@ class(obj)
 class(obj2)
 class(obj3)
 
+# Data
+
+class(lubridate::dmy("01-01-2019"))
+class(as.Date("2019-01-01"))
+
 # Lógicos
 
-obj <- TRUE
+obj <- T
+obj1 <- F
+
+T <- 1
+T
+
 
 # Bases (data.frame)
 
 class(imdb)
 
+tibble::view()
 
+imdb
+
+imdb <- read_csv("dados/imdb.csv")
+class(imdb)
 
 # Lendo vários arquivos ---------------------------------------------------
 
@@ -86,13 +134,14 @@ imdb_2015 <- read_csv("dados/por-ano/imdb-2015.csv")
 imdb <- rbind(imdb_2013, imdb_2014, imdb_2015)
 
 
-
-
 # Vetores -----------------------------------------------------------------
 
 c(1, 4, 3, 10)
 
 1:10
+
+seq(1, 10, 2)
+seq(from = -12, to = 10, by = 3)
 
 # Subsetting
 
@@ -108,12 +157,25 @@ vetor[-c(1, 3)]
 
 class(c(1, 2, 3))
 
-c(1, 2, 3, "a")
+vetor <- c(1, 2, 3, "a")
+c(1, 2, 3, "a") -> vetor
 c(TRUE, FALSE, "a")
-c(1L, 2L, "a")
+class(c(1L, 2L))
 c(TRUE, FALSE, 1)
 
+# character > numeric > inteiro > lógico
 
+as.numeric(c(1, 2, 3, "a"))
+as.character()
+as.logical()
+as.Date()
+
+is.numeric(vetor)
+is.character(1)
+
+imdb$receita
+
+is.numeric(imdb$receita)
 
 # Controle de fluxo -------------------------------------------------------
 
@@ -167,6 +229,8 @@ collect(imdb_select)
 # db.rstudio.com
 
 # Outros formatos ---------------------------------------------------------
+
+#rds
 
 library(jsonlite)
 imdb_json <- read_json("dados/imdb.json")
