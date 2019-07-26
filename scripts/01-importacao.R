@@ -82,7 +82,6 @@ imdb_excel <- read_excel("dados/imdb.xlsx")
 install.packages("tidyverse")
 library(tidyverse)
 
-
 # Classes -----------------------------------------------------------------
 
 # Numéricos (numeric)
@@ -131,7 +130,9 @@ imdb_2013 <- read_csv("dados/por-ano/imdb-2013.csv")
 imdb_2014 <- read_csv("dados/por-ano/imdb-2014.csv")
 imdb_2015 <- read_csv("dados/por-ano/imdb-2015.csv")
 
-imdb <- rbind(imdb_2013, imdb_2014, imdb_2015)
+imdb <- rbind(imdb_2013, imdb_2014)
+
+imdb <- rbind(imdb, imdb_2015)
 
 
 # Vetores -----------------------------------------------------------------
@@ -178,6 +179,8 @@ imdb$receita
 is.numeric(imdb$receita)
 
 # Controle de fluxo -------------------------------------------------------
+a = 1
+a > 2
 
 # if/else
 x <- 0
@@ -190,15 +193,22 @@ if(x < 0) {
   "positivo"
 }
 
+seq(1, 10, 2)
+
 # for
 for(i in 1:10) {
-  texto <- paste("Essa é a repetição", i)
-  print(texto)
+  if(i %% 2 != 0) {
+    texto <- paste0("Essa é a repetição ", i, "!")
+    print(texto)
+  }
 }
 
 # Lendo vários arquivos 2 -------------------------------------------------
 
-arquivos <- list.files("dados/por-ano/", full.names = TRUE)
+arquivos <- list.files(
+  "dados/por-ano/", 
+  full.names = TRUE
+)
   
 for(caminho in arquivos) {
   
@@ -211,7 +221,6 @@ for(caminho in arquivos) {
   }
   
 }
-  
 
 # SQL ---------------------------------------------------------------------
 
@@ -222,13 +231,30 @@ conexao <- src_sqlite("dados/imdb.sqlite", create = TRUE)
 imdb_sqlite <- tbl(conexao, "imdb")
 imdb_select <- tbl(conexao, sql("SELECT titulo, ano, diretor FROM imdb"))
 
+compute
+
+View(imdb_collect)
+
+select(imdb_sqlite, titulo)
+filter()
+mutate()
+
+
 # trazer para a memória
-collect(imdb_sqlite)
+imdb_collect <- collect(imdb_sqlite)
 collect(imdb_select)
 
 # db.rstudio.com
 
 # Outros formatos ---------------------------------------------------------
+
+library(ggplot2)
+
+p <- ggplot(mtcars, aes(y = mpg, x = cyl)) +
+  geom_point()
+
+p2 <- readr::read_rds("grafico.rds")
+readr::write_rds(p, "grafico.rds", compress = "gz")
 
 #rds
 
