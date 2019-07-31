@@ -458,14 +458,24 @@ imdb_generos <- read_rds("dados/imdb_generos.rds")
 
 # exemplo 1
 
-imdb %>% summarise(media_orcamento = mean(orcamento, na.rm=TRUE))
+  summarise(
+    imdb,
+    media_orcamento = mean(orcamento, na.rm=TRUE)
+  )
+
+media_orcamento = mean(imdb$orcamento, na.rm=TRUE)
+
+
 
 # exemplo 2
 
-imdb %>% summarise(
-  media_orcamento = mean(orcamento, na.rm=TRUE),
-  mediana_orcamento = median(orcamento, na.rm = TRUE)
-)
+imdb_sumarizado <- imdb %>% 
+  summarise(
+    media_orcamento = mean(orcamento, na.rm=TRUE),
+    mediana_orcamento = median(orcamento, na.rm = TRUE)
+  )
+
+
 
 # exemplo 3
 
@@ -481,15 +491,43 @@ imdb %>% summarise(
 imdb_generos %>%
   summarise(n_diretora = sum(genero == "female", na.rm = TRUE))
 
+
+
 # exercício 1
 # Use o `summarise` para calcular a proporção de filmes com diretoras.
+imdb_generos %>%
+  summarise(
+    n_diretora = sum(genero == "female", na.rm = TRUE)/n(),
+    n = sum(!is.na(genero)),
+    p_diretora = (n_diretora/n)
+  )
+
+nrow(imdb_generos)
 
 # exercício 2
 # Calcule a duração média e mediana dos filmes da base.
+imdb_sumarizado <- imdb %>% 
+  summarise(
+    media_duracao = mean(duracao, na.rm=TRUE),
+    mediana_duracao = median(duracao, na.rm = TRUE)
+  )
 
 # exercício 3
 # Calcule o lucro médio dos filmes com duracao < 60 minutos. E o lucro médio dos filmes com
 # mais de 2 horas.
+imdb_sumarizado <- imdb %>% 
+  mutate(
+    lucro = receita - orcamento,
+    filmes_de_longa_metragem = duracao > 120,
+    diretor_que_comeca_com_w = str_detect(diretor, "^W")
+  ) %>%
+  summarise(
+    lucro_medio_curtas = mean(lucro[as.numeric(duracao) <  60], na.rm=TRUE),
+    lucro_medio_longas = mean(lucro[filmes_de_longa_metragem & diretor_que_comeca_com_w], na.rm = TRUE)
+  )
+
+
+
 
 # group_by + summarise ----------------------------------------------------
 
@@ -511,15 +549,30 @@ imdb %>%
 
 # exercício 1
 # Crie uma tabela com apenas o nome dos diretores com mais de 10 filmes.
+imdb %>% 
+  group_by(diretor) %>% 
+  summarise(qtd_filmes = n()) %>%
+  filter(qtd_filmes > 10, !is.na(diretor)) %>%
+  arrange(desc(qtd_filmes))
 
 # exercício 2
 # Crie uma tabela com a receita média e mediana dos filmes por ano.
+imdb_sumarizado <- imdb %>% 
+  group_by(ano) %>%
+  summarise(
+    media_receita = mean(receita, na.rm=TRUE),
+    mediana_receita = median(receita, na.rm = TRUE)
+  )
 
 # exercício 3
 # Crie uma tabela com a nota média do imdb dos filmes por tipo de classificacao.
+imdb_sumarizado <- imdb %>% 
+  group_by(classificacao) %>%
+  summarise(
+    media_nota_imdb = mean(nota_imdb, na.rm=TRUE)
+  )
 
 # exemplo 4
-
 imdb %>%
   filter(str_detect(generos, "Action"), !is.na(diretor)) %>%
   group_by(diretor) %>%
@@ -529,16 +582,27 @@ imdb %>%
 # exemplo 5
 
 imdb %>% 
-  filter(ator_1 %in% c("Brad Pitt", "Angelina Jolie Pitt")) %>%
+  filter(str_detect(ator_1, "Pitt|Maria")) %>%
   group_by(ator_1) %>%
-  summarise(orcamento = mean(orcamento), receita = mean(receita), qtd = n())
+  summarise(
+    orcamento = mean(orcamento), 
+    receita = mean(receita), 
+    qtd = n()
+  )
 
 # left join ---------------------------------------------------------------
 
 # exemplo 1
 
 imdb_generos2 <- imdb %>%
-  left_join(imdb_generos, by = c("titulo", "diretor", "ano"))
+  left_join(imdb_generos, by = c("diretor", "ano"))
+
+
+
+imdb_generos %>% 
+  distinct(diretor, ano) %>%
+  dim
+
 
 # exemplo 2
 
@@ -551,12 +615,23 @@ imdb_cor <- left_join(imdb, depara_cores, by = c("cor"))
 
 # exemplo 3
 
+imdb_generos <- imdb_generos %>%
+  rename(DIR = diretor)
+
 imdb_generos3 <- imdb %>%
-  left_join(imdb_generos, by = c("diretor", "ano"))
+  left_join(imdb_generos, by = c("diretor" = "DIR", "ano" = "ano"))
 
 # exercicio 1
 # Calcule a média dos orçamentos e receitas para filmes feitos por
 # genero do diretor.
+
+imdb_generos2 <- imdb %>%
+  left_join(imdb_generos, by = c("diretor", "ano")) %>%
+  group_by(genero) %>%
+  summarise(
+    orcamento_medio = mean(orcamento, na.rm = TRUE),
+    receita_media = mean(receita, na.rm = TRUE)
+  )
 
 # gather ------------------------------------------------------------------
 
