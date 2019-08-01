@@ -272,3 +272,38 @@ listamos o(a) ator(atriz) que mais trabalhou em conjunto com cada diretor.
 
 
 
+Anotações {data-orientation=columns}
+============================================
+
+<h4>Próximos passos</h4>
+
+1. reparar que dá para colocar código HMTL no texto.
+2. revisitar os graficos e colocar ggplotly() onde lhe convier.
+3. solicitar ao professor para falar sobre graficos waterfall.
+
+<h4>Referências</h4>
+
+- [rmarkdown](https://rmarkdown.rstudio.com/lesson-1.html)
+- [rmarkdown book](https://bookdown.org/yihui/rmarkdown/)
+- [flexdashboard](https://rmarkdown.rstudio.com/flexdashboard/using.html)
+- [kable](https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html)
+- [bookdown](https://bookdown.org/yihui/bookdown/get-started.html)
+
+
+Agradecimento {data-orientation=columns}
+============================================
+
+<h3>Agradecimento</h3>
+
+<h4>
+A Curso-R agradece a turma de Introdução ao R 201907 pela participação, pelo carinho e pelo aprendizado.
+</h4>
+
+</br>
+</br>
+<center>
+<div style="width:800px">
+![](../slides/img/professores.png){width=100%}
+</div>
+</center>
+
