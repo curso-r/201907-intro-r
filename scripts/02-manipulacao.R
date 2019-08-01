@@ -637,11 +637,12 @@ imdb_generos2 <- imdb %>%
 
 # exemplo 1
 
-imdb_gather <- gather(imdb, "importancia_ator", "nome_ator", starts_with("ator"))
+imdb_gather <- imdb %>%
+  rowid_to_column() %>%
+  gather("importancia_ator", "nome_ator", starts_with("ator"))
 
 # spread ------------------------------------------------------------------
 
 # exemplo 1
 
 imdb <- spread(imdb_gather, importancia_ator, nome_ator)
-

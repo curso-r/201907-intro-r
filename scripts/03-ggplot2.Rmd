@@ -93,9 +93,9 @@ imdb %>%
   ggplot() +
   geom_point(mapping = aes(x = orcamento, y = receita, color = lucro)) +
   labs(x = "Orçamento", y = "Arrecadação", color = "Houve lucro?") +
-  scale_y_continuous(label = scales::dollar_format()) +
-  scale_x_continuous(label = scales::dollar_format()) +
-  scale_color_manual(values = c("red", "green"), labels = c("N", "S"))
+  scale_y_continuous(label = scales::dollar_format(prefix = "R$ ", big.mark = ".", decimal.mark = ",")) +
+  scale_x_continuous(label = scales::dollar_format(prefix = "R$ ", big.mark = ".", decimal.mark = ",")) +
+  scale_color_manual(values = c("#123456", "#abcdef"), labels = c("N", "S"))
 ```
 
 Também podemos colocar as variáveis na escala de milhões.
@@ -126,23 +126,27 @@ imdb %>%
 1. Crie um gráfico de dispersão da nota do imdb pelo orçamento.
 
 ```{r}
-
+imdb %>%
+  ggplot() +
+  geom_point(aes(x = orcamento, y = nota_imdb))
 ```
 
 2. Pinte todos os pontos do gráfico de azul.
 
 ```{r}
-
+imdb %>%
+  ggplot() +
+  geom_point(aes(x = orcamento, y = nota_imdb), color = "blue")
 ```
 
 3. Refaça o gráfico do item 1. apenas para filmes com classificação etária livre. Também refaça para os filmes com classificação etária "a partir de 13 anos".
 
 ```{r}
-
+imdb %>%
+  filter(classificacao == "A partir de 13 anos") %>%
+  ggplot() +
+  geom_point(aes(x = orcamento, y = nota_imdb))
 ```
-
-
-
 
 Podemos usar `facets` para fazer um gráfico para cada nível de uma variável.
 
@@ -186,15 +190,8 @@ imdb %>%
   filter(!is.na(diretor)) %>% 
   dplyr::top_n(10, n) %>%
   ggplot() +
-  geom_bar(aes(x = diretor, y = n), stat = "identity")
-
-imdb %>% 
-  dplyr::count(diretor) %>% 
-  arrange(desc(n)) %>% 
-  filter(!is.na(diretor)) %>% 
-  dplyr::top_n(10, n) %>%
-  ggplot() +
-  geom_col(aes(x = diretor, y = n))
+  geom_col(aes(x = diretor, y = n)) + 
+  coord_flip()
 ```
 
 Vamos arrumar os labels rotacionando os nomes.
@@ -301,7 +298,7 @@ imdb %>%
   filter(n() >= 15) %>%
   ungroup() %>% 
   mutate(
-    diretor = fct_reorder(diretor, lucro, .fun = max, na.rm = TRUE)
+    diretor = fct_reorder(diretor, lucro, .fun = median, na.rm = TRUE)
   ) %>% 
   ggplot() +
   geom_boxplot(aes(x = diretor, y = lucro, fill = diretor)) +
@@ -398,8 +395,8 @@ imdb %>%
   group_by(ano) %>% 
   summarise(nota_media = mean(nota_imdb, na.rm = TRUE)) %>% 
   ggplot(aes(x = ano, y = nota_media)) +
-  geom_point(alpha = 0.1) +
   geom_line(alpha = 0.1) +
+  geom_point(alpha = 0.1) +
   geom_text(aes(label = nota_media))
 ```
 
@@ -426,7 +423,15 @@ desses atores.
 3. Selecione um dos atores e estude a nota de seus filmes no IMDB ao longo do tempo.
 
 ```{r}
-
+imdb %>%
+  group_by(ator_1) %>%
+  mutate(tamanho = n()) %>%
+  ungroup() %>%
+  filter(tamanho == max(tamanho)) %>%
+  group_by(ator_1, ano) %>%
+  summarise(media_imdb = mean(nota_imdb)) %>%
+  ggplot() +
+  geom_line(aes(x = ano, y = media_imdb))
 ```
 
 
@@ -434,9 +439,16 @@ desses atores.
 E se quiséssemos utilizar as 3 colunas de atores?
 
 ```{r}
-imdb_atores <- imdb %>% 
-  gather(posicao, ator, ator_1, ator_2, ator_3) %>% 
-View(imdb_atores)
+imdb %>% 
+  gather(posicao, ator, ator_1, ator_2, ator_3) %>%
+  group_by(ator) %>%
+  mutate(tamanho = n()) %>%
+  ungroup() %>%
+  filter(tamanho == max(tamanho)) %>%
+  group_by(ator, ano, posicao) %>%
+  summarise(media_imdb = mean(nota_imdb)) %>%
+  ggplot() +
+  geom_line(aes(x = ano, y = media_imdb, color = posicao))
 ```
 
 ## Exercícios
@@ -470,7 +482,8 @@ imdb %>%
   ) +
   scale_y_continuous(label = scales::dollar_format()) +
   scale_x_continuous(label = scales::dollar_format()) +
-  theme_bw()
+  theme_dark()
+  # + ggsave("~/Downloads/exemplo.png")
 ```
 
 Títulos
@@ -568,6 +581,9 @@ imdb %>%
 Plotly
 
 ```{r}
+if (!requireNamespace("plotly", quietly = TRUE)) {
+  install.packages("plotly")
+}
 library(plotly)
 
 p <- imdb %>% 
@@ -582,8 +598,9 @@ ggplotly(p, tooltip = "text")
 Patchwork
 
 ```{r}
-devtools::install_github("thomasp85/patchwork")
-
+if (!requireNamespace("patchwork", quietly = TRUE)) {
+  devtools::install_github("thomasp85/patchwork")
+}
 library(patchwork)
 
 p1 <- imdb %>% 
@@ -614,3 +631,8 @@ p2 <- imdb %>%
 p1 + p2
 ```
 
+## Links:
+
+- [Referência de funções](https://ggplot2.tidyverse.org/reference/)
+- ["Cola"](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf)
+- [Paletas do `RColowBrewer`](http://colorbrewer2.org/)
