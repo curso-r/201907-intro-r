@@ -272,6 +272,18 @@ listamos o(a) ator(atriz) que mais trabalhou em conjunto com cada diretor.
 
 
 
+
+
+
+
+
+
+
+
+
+
+<!--
+
 Anotações {data-orientation=columns}
 ============================================
 
@@ -307,3 +319,4 @@ A Curso-R agradece a turma de Introdução ao R 201907 pela participação, pelo
 </div>
 </center>
 
+-->
