@@ -14,18 +14,20 @@ library(tidyverse)
 imdb <- read_rds("dados/imdb.rds")
 ```
 
+
 Visão geral
-======================================================================
+============
+
 
 Row {data-height=110}
-----------------------------------------------------------------------
+-------------------
 
 ### O problema
 
 O estúdio de filmes FilmR precisa escolher um(a) diretor(a) e um(a) protagonista para o seu próximo filme. Para isso ele conduziu uma análise exploratória em uma base de dados com diversas informações de quase 4 mil filmes lançados nos Estados Unidos desde 1916. O objetivo da FilmR é identificar os diretores e atores que trariam o maior retorno financeiro para a produtora. 
 
-Row
------------------------------------------------------------------------
+Row 
+------------------------------------------------
 
 ### Qtd Filmes
 
@@ -39,27 +41,47 @@ valueBox(nrow(imdb), icon = "fa-film")
 # dica1: pode usar imbd$diretor
 # dica2: funcao n_distinct()
 # usar icone "fa-video"
+valueBox(n_distinct(imdb$diretor), icon = "fa-video")
 ```
+
 
 ### Qtd Atores
 
 ```{r}
 # usar icone "fa-user"
-
+atores <- unique(c(imdb$ator_1, imdb$ator_2, imdb$ator_3))
+valueBox(length(atores), icon = "fa-user")
 ```
 
+### Mais um value box
+
+```{r}
+valueBox(
+  123, 
+  icon = "fa-user", 
+  color = "green"
+)
+```
+
+
 Row
---------------------------------------------------------------
+-----------------------------------------------
 
 ### Relação entre nota e lucro
 
-```{r}
-imdb <- imdb %>% mutate(lucro = receita - orcamento)
-# dica1: filtrar NAs. use a funcao 'is.na()' e o operador logico '!'
-# dica2: fazer grafico com ggplot(), aes(), geom_point()
-# dica3: dar uma ajeitada no grafico com labs(x = "Nota IMDB", y = "Lucro")
-# dica4: dar uma ajeitada no grafico com scale_y_continuous(labels = scales::dollar_format(big.mark = "."))
-# dica5: solicitar ao professo para mostrar o stat_smooth(method = "lm", se = FALSE, color = "darksalmon")
+```{r, fig.height=2.5, fig.width=4}
+imdb <- imdb %>% mutate(lucro = receita - orcamento) 
+
+###### grafico
+grafico_1 <- imdb %>%
+  filter(!is.na(nota_imdb), !is.na(lucro)) %>%
+  ggplot(aes(x = nota_imdb, y = lucro)) +
+  geom_point(size = 0.1) +
+  labs(x = "Nota IMDB", y = "Lucro") +
+  scale_y_continuous(labels = scales::dollar_format(big.mark = ".")) +
+  stat_smooth(se = TRUE, color = "darksalmon", level = 0.999999)
+
+plotly::ggplotly(grafico_1)
 
 ```
 
@@ -68,11 +90,21 @@ Mas em geral filmes com notas bem altas lucram mais do que os outros.
 
 ### Relação entre o orçamento e lucro
 
-```{r}
-# dica1: copiar e colar codigo do grafico anterior e mudar os parametros de acordo.
+```{r, fig.height=3}
+imdb %>%
+  mutate(
+    lucro = lucro/1e6,
+    orcamento = orcamento/1000000
+  ) %>%
+  filter(!is.na(orcamento), !is.na(lucro)) %>%
+  ggplot(aes(x = orcamento, y = lucro)) +
+  geom_point(size = 0.1) +
+  labs(x = "Orçamento (Milhões de Dólares)", y = "Lucro (Milhões de Dólares)") +
+  # scale_y_continuous(labels = scales::dollar_format(big.mark = ".")) +
+  # scale_x_continuous(labels = scales::dollar_format(big.mark = ".")) +
+  stat_smooth(se = TRUE, color = "darksalmon", level = 0.999999)
 ```
 
----
 
 > Filmes com maior orçamento têm maior possibilidade de prejuizo. Essas duas variáveis não são fortemente correlacionadas.
 
@@ -108,7 +140,8 @@ imdb_genero <- imdb %>%
       genero == "dv_drama" ~ "Drama",
       genero == "dv_romance" ~ "Romance",
       genero == "dv_comedia" ~ "Comédia",
-      genero == "dv_animacao" ~ "Animação"
+      genero == "dv_animacao" ~ "Animação",
+      TRUE ~ "Outro gênero"
     )
   )
 
@@ -116,10 +149,10 @@ imdb_genero <- imdb %>%
 # ordenar os boxplots (dos generos) por lucro usando a funcao fct_reorder().
 imdb_genero %>%
   mutate(
-    genero = as_factor(genero) 
+    genero = fct_reorder(as_factor(genero), lucro, .fun = median, na.rm = TRUE)
   ) %>%
   ggplot(aes(x = genero, y = lucro)) +
-  # colocar o geom_* correspondente aqui...
+  geom_boxplot() +
   scale_y_continuous(label = scales::dollar_format()) +
   labs(x = "Gênero", y = "Lucro") +
   theme_minimal()
@@ -137,17 +170,22 @@ calcula_valor_corte <- function(x) {
 
 valor_corte <- calcula_valor_corte(imdb$lucro)
 
-# imdb_genero %>%
-#   mutate(
-#     outlier = lucro > valor_corte
-#   ) %>%
-#   # agrupar por genero.
-#   # calcular a proporcao de outliers por genero. dicas: summarise, mean, na.rm = TRUE.
-#   ggplot(aes(x = genero, y =outlier)) +
-#   geom_col(fill = "darksalmon") +
-#   scale_y_continuous(labels = scales::percent_format()) +
-#   theme_minimal() +
-#   labs(y = "Percentual de filmes que estouraram", x = "Gênero")
+imdb_genero %>%
+  mutate(
+    outlier = lucro > valor_corte
+  ) %>%
+  group_by(genero) %>%
+  summarise(
+    outlier = mean(outlier,  na.rm = TRUE)
+  ) %>%
+  mutate(
+    genero = fct_reorder(genero, outlier)
+  ) %>%
+  ggplot(aes(x = genero, y =outlier)) +
+  geom_col(fill = "darksalmon") +
+  scale_y_continuous(labels = scales::percent_format()) +
+  theme_minimal() +
+  labs(y = "Percentual de filmes que estouraram", x = "Gênero")
 
 
   # (depois de conseguir visualizar o gráfico de barras) usar mutate() e fct_reorder() para ordenar as barras. 
@@ -231,25 +269,25 @@ Column
 O estúdio prefere um ator com certa experiência, que pode ser medida pelo número de filmes. No entanto, não quer deixar a qualidade de lado - quer os atores de participaram com filmes que tiveram boas avaliações.
 
 ```{r}
-# imdb %>%
-#   select(ano, nota_imdb, lucro, starts_with("ator")) %>%
-#   gather(id_ator, ator, starts_with("ator")) %>%
-#   group_by(Ator = ator) %>%
-#   summarise(
-#     n = n(),
-#     `Nota IMDB` = mean(nota_imdb, na.rm = TRUE),
-#     `Ano Último Filme` = max(ano, na.rm = TRUE),
-#     `Lucro` = mean(lucro, na.rm = TRUE)
-#   ) %>%
-#   filter(n >= 10) %>%
-#   filter(row_number(desc(`Nota IMDB`)) <= 15) %>%
-#   arrange(desc(`Nota IMDB`)) %>%
-#   mutate(
-#     `Nota IMDB` = scales::format_format(decimal.mark=",")(round(`Nota IMDB`, 1)),
-#     Lucro = scales::dollar_format(big.mark = ".")(Lucro)
-#   ) %>%
-#   rename(`Qtd Filmes` = n) %>%
-#   knitr::kable()
+imdb %>%
+  select(ano, nota_imdb, lucro, starts_with("ator")) %>%
+  gather(id_ator, ator, starts_with("ator")) %>%
+  group_by(Ator = ator) %>%
+  summarise(
+    n = n(),
+    `Nota IMDB` = mean(nota_imdb, na.rm = TRUE),
+    `Ano Último Filme` = max(ano, na.rm = TRUE),
+    `Lucro` = mean(lucro, na.rm = TRUE)
+  ) %>%
+  filter(n >= 10) %>%
+  filter(row_number(desc(`Nota IMDB`)) <= 15) %>%
+  arrange(desc(`Nota IMDB`)) %>%
+  mutate(
+    `Nota IMDB` = scales::format_format(decimal.mark=",")(round(`Nota IMDB`, 1)),
+    Lucro = scales::dollar_format(big.mark = ".")(Lucro)
+  ) %>%
+  rename(`Qtd Filmes` = n) %>%
+  kable()
 ```
 
 # Column
@@ -266,7 +304,7 @@ listamos o(a) ator(atriz) que mais trabalhou em conjunto com cada diretor.
 # imdb_experientes %>%
 # empilhar as tres colunas de atores.
 # contar quantos filmes cada par diretor/ator fizeram juntos
-# pegar (filtrar) apenas o ator que mais fez filte com cada diretor
+# pegar (filtrar) apenas o ator que mais fez filme com cada diretor
 # use kable() para a tabela ficar apresentavel
 ```
 
@@ -282,7 +320,7 @@ listamos o(a) ator(atriz) que mais trabalhou em conjunto com cada diretor.
 
 
 
-<!--
+
 
 Anotações {data-orientation=columns}
 ============================================
@@ -319,4 +357,4 @@ A Curso-R agradece a turma de Introdução ao R 201907 pela participação, pelo
 </div>
 </center>
 
--->
+

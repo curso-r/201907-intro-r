@@ -67,3 +67,10 @@ p <- plot_ly(
 p
 ```
 
+
+```{r}
+
+waterfallchart(value~label, data=rasiel, groups=rasiel$subtotal)
+
+```
+
